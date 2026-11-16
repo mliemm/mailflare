@@ -1,6 +1,6 @@
 import type { B2Config, StorageStatus } from "@/lib/storage/b2-types";
 
-type B2Env = Partial<Pick<CloudflareEnv, "B2_KEY_ID" | "B2_APPLICATION_KEY" | "B2_BUCKET" | "B2_ENDPOINT" | "S3_BUCKET" | "S3_REGION" | "S3_ACCESS_KEY_ID" | "S3_SECRET_ACCESS_KEY" | "MAILFLARE_RUNTIME">> &
+type B2Env = Partial<Pick<CloudflareEnv, "B2_KEY_ID" | "B2_APPLICATION_KEY" | "B2_BUCKET" | "B2_ENDPOINT" | "S3_BUCKET" | "S3_REGION" | "S3_ENDPOINT" | "S3_ACCESS_KEY_ID" | "S3_SECRET_ACCESS_KEY" | "MAILFLARE_RUNTIME">> &
 	Partial<Record<"AWS_ACCESS_KEY_ID" | "AWS_SECRET_ACCESS_KEY" | "AWS_REGION" | "AWS_DEFAULT_REGION", string>>;
 
 const ENDPOINT_PATTERN = /^s3\.([a-z0-9-]+)\.backblazeb2\.com$/;
@@ -32,15 +32,22 @@ export function getB2Config(env: B2Env): B2Config | null {
 const S3_REGION_PATTERN = /^[a-z]{2}(-gov|-iso[a-z]?)?-[a-z]+-\d$/;
 
 /**
- * AWS S3 settings: S3_BUCKET and S3_REGION, with S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY falling back to the
- * AWS_* variables the SES integration already uses. Backblaze wins when both are configured.
+ * S3-compatible storage: S3_BUCKET and S3_REGION, with S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY falling back to the
+ * AWS_* variables the SES integration already uses. S3_ENDPOINT points at R2 or another S3-compatible host and uses
+ * the region "auto" where the provider requires it. Backblaze wins when both are configured.
  */
 export function getS3Config(env: B2Env): B2Config | null {
 	const bucket = env.S3_BUCKET?.trim();
 	const region = (env.S3_REGION ?? env.AWS_REGION ?? env.AWS_DEFAULT_REGION)?.trim();
 	const keyId = (env.S3_ACCESS_KEY_ID ?? env.AWS_ACCESS_KEY_ID)?.trim();
 	const applicationKey = (env.S3_SECRET_ACCESS_KEY ?? env.AWS_SECRET_ACCESS_KEY)?.trim();
-	if (!bucket || !region || !keyId || !applicationKey || !S3_REGION_PATTERN.test(region)) return null;
+	const customEndpoint = env.S3_ENDPOINT?.trim();
+	if (!bucket || !region || !keyId || !applicationKey) return null;
+	if (customEndpoint) {
+		if (region !== "auto" && !S3_REGION_PATTERN.test(region)) return null;
+		return { keyId, applicationKey, bucket, region, endpoint: normalizeB2Endpoint(customEndpoint) };
+	}
+	if (!S3_REGION_PATTERN.test(region)) return null;
 	return { keyId, applicationKey, bucket, region, endpoint: `s3.${region}.amazonaws.com` };
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BadgeDollarSign, Bot, Globe2, KeyRound, Mail, Palette, Users } from "@/components/icons";
+import { Globe2, KeyRound, Mail, Palette, Users } from "@/components/icons";
 import { useLanguage } from "@/components/language-provider";
 import type { TranslationKey } from "@/lib/i18n/types";
 import { AdminUpdateCard } from "@/components/admin-update-card";
@@ -12,18 +12,11 @@ type AdminSection = {
 	href: string;
 	titleKey: TranslationKey;
 	descriptionKey: TranslationKey;
-	icon: typeof Bot;
+	icon: typeof Mail;
 	permission?: "primary" | "domains" | "users";
 };
 
 const sections: AdminSection[] = [
-	{
-		href: "/agent",
-		titleKey: "admin.nav.agent",
-		descriptionKey: "admin.section.agent",
-		icon: Bot,
-		permission: "primary",
-	},
 	{
 		href: "/mailboxes",
 		titleKey: "admin.nav.mailboxes",
@@ -42,13 +35,6 @@ const sections: AdminSection[] = [
 		titleKey: "admin.nav.branding",
 		descriptionKey: "admin.section.branding",
 		icon: Palette,
-		permission: "primary",
-	},
-	{
-		href: "/licenses",
-		titleKey: "admin.nav.licenses",
-		descriptionKey: "admin.section.licenses",
-		icon: BadgeDollarSign,
 		permission: "primary",
 	},
 	{

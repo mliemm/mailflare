@@ -13,6 +13,7 @@ import {
 import { useLanguage } from "@/components/language-provider";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { authFetch } from "@/lib/auth/client";
+import { DRIVE_DISABLED } from "@/lib/drive/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { AttachmentRisk } from "@/lib/email/attachment-risk";
 import type { MessageAttachmentViewerProps } from "./message-attachment-viewer-types";
@@ -94,7 +95,7 @@ export function MessageAttachmentViewer({
 
 	// Ask once per opened attachment whether it is already in Drive, so the button starts disabled.
 	useEffect(() => {
-		if (!open || !attachment || user?.driveEnabled === false) return;
+		if (!open || !attachment || DRIVE_DISABLED || user?.driveEnabled === false) return;
 		const id = attachment.id;
 		let cancelled = false;
 		void authFetch(`/api/messages/${messageId}/attachments/${id}/save-to-drive`)
@@ -187,7 +188,7 @@ export function MessageAttachmentViewer({
 				<div className="flex shrink-0 items-center justify-end gap-3">
 					{risk && !flagged && <span className="text-xs text-neutral-500">{t("attachment.risk.ok")}</span>}
 					{saveState === "error" && <span className="text-xs text-red-600">{t("attachment.saveToDriveFailed")}</span>}
-					{user?.driveEnabled !== false && (
+					{!DRIVE_DISABLED && user?.driveEnabled !== false && (
 						<Button
 							variant="outline"
 							onClick={() => void saveToDrive()}

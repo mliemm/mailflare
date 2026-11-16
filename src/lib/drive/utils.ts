@@ -1,5 +1,8 @@
 import type { DriveCrumb, DriveRole, DriveRow } from "./types";
 
+/** Deployment switch: this instance does not host Drive files. */
+export const DRIVE_DISABLED = true;
+
 /**
  * Files upload in parts into a multipart upload (R2, or Backblaze B2 when configured), so no whole file is ever buffered in the Worker;
  * with B2 one part at a time is held in memory to be signed, so keep this well under the 128 MB Worker limit. A part must stay

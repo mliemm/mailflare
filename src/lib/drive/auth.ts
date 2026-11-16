@@ -3,9 +3,11 @@ import { getDb } from "@/db";
 import { getEnv } from "@/lib/cloudflare";
 import { requireSessionUser } from "@/lib/api/auth";
 import { hasValidSessionMutationOrigin } from "@/lib/auth/origin";
+import { DRIVE_DISABLED } from "@/lib/drive/utils";
 
 /** Drive is a per-user app an admin can switch off; every Drive API goes through authorizeDrive. */
 export function driveAccessError(user: { driveEnabled: boolean } | null | undefined) {
+	if (DRIVE_DISABLED) return NextResponse.json({ error: "Drive is disabled on this installation" }, { status: 403 });
 	return user && !user.driveEnabled
 		? NextResponse.json({ error: "Drive is disabled for this account" }, { status: 403 })
 		: null;

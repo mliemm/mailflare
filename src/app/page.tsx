@@ -11,6 +11,7 @@ import { getHomeBranding } from "./home-server-utils";
 import { HomeAuthProvider } from "./home-auth";
 import { HomeHeaderActions } from "./home-header-actions";
 import { HomeHeroActions } from "./home-hero-actions";
+import { PoweredBy } from "@/components/sidebar-footer";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export default async function HomePage() {
 
   return (
     <HomeAuthProvider initialUser={initialUser}>
-    <div className="min-h-dvh bg-[#f6f8fc] text-neutral-900">
+    <div className="flex min-h-dvh flex-col bg-[#f6f8fc] text-neutral-900">
       <header className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
@@ -217,6 +218,12 @@ export default async function HomePage() {
 					</div>
 				</section> */}
       </main>
+
+      <footer className="mt-auto border-t border-neutral-200/60">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-end px-4 py-6 sm:px-6 lg:px-8">
+          <PoweredBy />
+        </div>
+      </footer>
     </div>
     </HomeAuthProvider>
   );

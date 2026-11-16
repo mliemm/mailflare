@@ -8,6 +8,8 @@ interface CloudflareEnv {
 	DATABASE_DRIVER?: string;
 	/** Auth token for libSQL / Turso. */
 	DATABASE_AUTH_TOKEN?: string;
+	/** Local file for a libSQL embedded replica; reads are local and writes go to DATABASE_URL. */
+	DATABASE_REPLICA_PATH?: string;
 	/** Hyperdrive binding, used as the connection string when DATABASE_URL is unset. */
 	HYPERDRIVE?: { connectionString: string };
 	EMAIL: SendEmail;
@@ -56,11 +58,13 @@ interface CloudflareEnv {
 	B2_BUCKET?: string;
 	B2_ENDPOINT?: string;
 	/**
-	 * AWS S3 storage, used when B2 is not configured. Credentials fall back to AWS_ACCESS_KEY_ID /
+	 * S3-compatible storage, used when B2 is not configured. Credentials fall back to AWS_ACCESS_KEY_ID /
 	 * AWS_SECRET_ACCESS_KEY (read from the environment), so an existing SES key can serve both.
+	 * S3_ENDPOINT supports R2 and other S3-compatible hosts; set S3_REGION=auto for R2.
 	 */
 	S3_BUCKET?: string;
 	S3_REGION?: string;
+	S3_ENDPOINT?: string;
 	S3_ACCESS_KEY_ID?: string;
 	S3_SECRET_ACCESS_KEY?: string;
 	CF_TOKEN?: string;

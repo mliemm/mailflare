@@ -7,10 +7,13 @@ const sqliteParam = (value: unknown) => {
 };
 
 /** libSQL / Turso: remote (`libsql://`, `https://`) and local `file:` databases. */
-export function openLibsql({ url, authToken }: OpenOptions): SqlExecutor {
+export function openLibsql({ url, authToken, replicaPath }: OpenOptions): SqlExecutor {
 	return lazyExecutor("sqlite", async () => {
 		const { createClient } = await import("@libsql/client");
-		const client = createClient({ url, authToken });
+		const client = replicaPath
+			? createClient({ url: `file:${replicaPath}`, syncUrl: url, authToken, syncInterval: 60 })
+			: createClient({ url, authToken });
+		if (replicaPath) await client.sync();
 		type Executable = { execute(statement: { sql: string; args: unknown[] }): Promise<{ rows: Array<Record<string, unknown>>; columns: string[]; rowsAffected: number; lastInsertRowid?: bigint }> };
 		const executorFor = (target: Executable, transaction?: SqlExecutor["transaction"]): SqlExecutor => ({
 			dialect: "sqlite",

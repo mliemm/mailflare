@@ -10,6 +10,7 @@ import {
 import { hasPasswordHash, hashPassword } from "@/lib/auth/password";
 import { ensureBookingUsername } from "@/lib/booking/username";
 import { upsertContactFromAddress } from "@/lib/contacts/service";
+import { demoCredentials } from "@/lib/demo-account";
 import { buildSnippet } from "@/lib/email/parse";
 import { newId } from "@/lib/ids";
 import { buildSeedRawMessage } from "@/lib/seed-raw";
@@ -19,10 +20,7 @@ import type {
 	SeedMessageDefinition,
 } from "@/lib/seed-types";
 
-export const demoCredentials = {
-	email: "admin@example.com",
-	password: "demo-password-change-me",
-};
+export { demoCredentials };
 
 const demoDomain = "example.com";
 

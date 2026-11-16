@@ -21,7 +21,7 @@ export interface ExternalDatabase extends CompatDatabase {
 }
 
 export function openExecutor(config: DatabaseConfig, shared: boolean): SqlExecutor {
-	const options: OpenOptions = { url: config.url ?? "", authToken: config.authToken, shared };
+	const options: OpenOptions = { url: config.url ?? "", authToken: config.authToken, replicaPath: config.replicaPath, shared };
 	switch (config.driver) {
 		case "node-postgres":
 			return openNodePostgres(options);

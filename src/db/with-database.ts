@@ -10,9 +10,9 @@ type DatabaseEnv = Partial<Pick<CloudflareEnv, "DATABASE_URL" | "DATABASE_DRIVER
 /** Resolve the configured database: env vars first, then process.env (self-hosted), then a Hyperdrive binding. */
 export function getDatabaseConfig(env: DatabaseEnv): DatabaseConfig {
 	const processEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
-	const pick = (key: "DATABASE_URL" | "DATABASE_DRIVER" | "DATABASE_AUTH_TOKEN") => (typeof env[key] === "string" && env[key]!.trim() ? env[key] : processEnv[key]);
+	const pick = (key: "DATABASE_URL" | "DATABASE_DRIVER" | "DATABASE_AUTH_TOKEN" | "DATABASE_REPLICA_PATH") => (typeof env[key] === "string" && env[key]!.trim() ? env[key] : processEnv[key]);
 	return resolveDatabaseConfig(
-		{ DATABASE_URL: pick("DATABASE_URL"), DATABASE_DRIVER: pick("DATABASE_DRIVER"), DATABASE_AUTH_TOKEN: pick("DATABASE_AUTH_TOKEN") },
+		{ DATABASE_URL: pick("DATABASE_URL"), DATABASE_DRIVER: pick("DATABASE_DRIVER"), DATABASE_AUTH_TOKEN: pick("DATABASE_AUTH_TOKEN"), DATABASE_REPLICA_PATH: pick("DATABASE_REPLICA_PATH") },
 		env.HYPERDRIVE?.connectionString,
 	);
 }
@@ -28,7 +28,7 @@ export function withDatabase(env: CloudflareEnv): CloudflareEnv {
 	if (cached) return cached;
 	const config = getDatabaseConfig(env);
 	if (config.driver === "d1") return env;
-	const key = `${config.driver}|${config.url}`;
+	const key = `${config.driver}|${config.url}|${config.replicaPath ?? ""}`;
 	let database = opened.get(key);
 	if (!database) {
 		database = openExternalDatabase(config, env.MAILFLARE_RUNTIME === "node");

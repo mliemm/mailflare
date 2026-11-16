@@ -23,6 +23,8 @@ export interface DatabaseConfig {
 	/** Connection string; `undefined` only for the D1 binding. */
 	url?: string;
 	authToken?: string;
+	/** Local file for a libSQL embedded replica, synced from `url`. */
+	replicaPath?: string;
 }
 
 /** Names accepted in DATABASE_DRIVER, including friendly aliases for hosted services. */
@@ -119,7 +121,8 @@ export function resolveDatabaseConfig(env: EnvLike, hyperdriveUrl?: string): Dat
 	} else {
 		driver = inferDriver(url);
 	}
-	return { dialect: DRIVER_DIALECT[driver], driver, url, authToken: text(env, "DATABASE_AUTH_TOKEN") };
+	const replicaPath = text(env, "DATABASE_REPLICA_PATH");
+	return { dialect: DRIVER_DIALECT[driver], driver, url, authToken: text(env, "DATABASE_AUTH_TOKEN"), ...(replicaPath ? { replicaPath } : {}) };
 }
 
 /**

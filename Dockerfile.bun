@@ -1,0 +1,37 @@
+# Bun runtime image for the self-hosted Mailflare app. The build stages match
+# Dockerfile; only the runtime changes from Node to Bun.
+FROM node:22-bookworm-slim AS base
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1 MAILFLARE_RUNTIME=node
+
+FROM base AS deps
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts && npm rebuild better-sqlite3
+
+FROM deps AS build
+COPY . .
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
+RUN npm run build:node && rm -rf .next-node/cache
+
+FROM deps AS prod-deps
+RUN npm prune --omit=dev --ignore-scripts \
+	&& rm -rf node_modules/wrangler node_modules/miniflare node_modules/workerd node_modules/@cloudflare node_modules/cloudflare node_modules/@aws-sdk node_modules/esbuild node_modules/@esbuild node_modules/typescript
+
+FROM oven/bun:1 AS runtime
+WORKDIR /app
+ENV NODE_ENV=production DATA_DIR=/data PORT=3000 SMTP_INBOUND_PORT=0
+COPY --chown=1000:1000 --from=prod-deps /app/node_modules ./node_modules
+COPY --chown=1000:1000 --from=build /app/.next-node ./.next-node
+COPY --chown=1000:1000 --from=build /app/dist ./dist
+COPY --chown=1000:1000 --from=build /app/public ./public
+COPY --chown=1000:1000 --from=build /app/drizzle ./drizzle
+COPY --chown=1000:1000 --from=build /app/package.json /app/next.config.ts ./
+COPY --chown=1000:1000 --from=build /app/src/lib/security/headers.ts ./src/lib/security/headers.ts
+RUN mkdir -p /data && chown 1000:1000 /data
+USER 1000:1000
+VOLUME ["/data"]
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s CMD bun -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/setup/status').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["bun", "dist/server.mjs"]

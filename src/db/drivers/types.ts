@@ -25,6 +25,8 @@ export interface SqlExecutor {
 export interface OpenOptions {
 	url: string;
 	authToken?: string;
+	/** Local file for a libSQL embedded replica, synced from `url`. */
+	replicaPath?: string;
 	/** Node keeps pools open between requests; Workers cannot reuse sockets across requests. */
 	shared: boolean;
 }
