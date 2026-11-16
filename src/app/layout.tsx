@@ -54,6 +54,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 	return (
 		<html lang={locale} dir={getDirection(locale)} data-remote-image-proxy="enabled" suppressHydrationWarning>
 			<head>
+				<meta name="theme-color" content="#f6f8fc" />
 				<script dangerouslySetInnerHTML={{ __html: sidebarBootstrapScript }} />
 				<script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
 				<link rel="icon" href="/api/branding/icon"></link>

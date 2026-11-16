@@ -1,4 +1,4 @@
-export type ThemePreference = "light" | "dark" | "system";
+export type ThemePreference = "light" | "dark" | "black" | "system";
 
 export const THEME_STORAGE_KEY = "mailflare-theme";
 export const THEME_CHANGED_EVENT = "mailflare:theme-changed";
@@ -8,15 +8,19 @@ export const THEME_CHANGED_EVENT = "mailflare:theme-changed";
 export const themeBootstrapScript = `(() => {
 	try {
 		const saved = localStorage.getItem("mailflare-theme");
-		const preference = saved === "light" || saved === "dark" ? saved : "system";
-		const dark = preference === "dark" || (preference === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
-		document.documentElement.classList.toggle("dark", dark);
-		document.documentElement.classList.toggle("light", !dark);
+		const preference = saved === "light" || saved === "dark" || saved === "black" ? saved : "system";
+		const dark = preference === "dark" || preference === "black" || (preference === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+		const root = document.documentElement;
+		root.classList.toggle("dark", dark);
+		root.classList.toggle("black", preference === "black");
+		root.classList.toggle("light", !dark);
+		const meta = document.querySelector('meta[name="theme-color"]');
+		if (meta) meta.setAttribute("content", preference === "black" ? "#000000" : dark ? "#202124" : "#f6f8fc");
 	} catch {}
 })();`;
 
 export function isThemePreference(value: unknown): value is ThemePreference {
-	return value === "light" || value === "dark" || value === "system";
+	return value === "light" || value === "dark" || value === "black" || value === "system";
 }
 
 export function readThemePreference(): ThemePreference {
@@ -30,6 +34,7 @@ export function readThemePreference(): ThemePreference {
 }
 
 export function resolveTheme(preference: ThemePreference): "light" | "dark" {
+	if (preference === "black") return "dark";
 	if (preference !== "system") return preference;
 	if (typeof window === "undefined") return "light";
 	return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -38,8 +43,12 @@ export function resolveTheme(preference: ThemePreference): "light" | "dark" {
 export function applyTheme(preference: ThemePreference): void {
 	if (typeof document === "undefined") return;
 	const dark = resolveTheme(preference) === "dark";
-	document.documentElement.classList.toggle("dark", dark);
-	document.documentElement.classList.toggle("light", !dark);
+	const root = document.documentElement;
+	root.classList.toggle("dark", dark);
+	root.classList.toggle("black", preference === "black");
+	root.classList.toggle("light", !dark);
+	const meta = document.querySelector('meta[name="theme-color"]');
+	if (meta) meta.setAttribute("content", preference === "black" ? "#000000" : dark ? "#202124" : "#f6f8fc");
 }
 
 export function saveThemePreference(preference: ThemePreference): void {
