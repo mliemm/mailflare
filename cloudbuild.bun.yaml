@@ -5,10 +5,10 @@ steps:
       - -f
       - Dockerfile.bun
       - -t
-      - asia-southeast1-docker.pkg.dev/mliem-invoice-prod/apps/mailflare:bun-2
+      - asia-southeast1-docker.pkg.dev/mliem-invoice-prod/apps/mailflare:bun-3
       - .
 images:
-  - asia-southeast1-docker.pkg.dev/mliem-invoice-prod/apps/mailflare:bun-2
+  - asia-southeast1-docker.pkg.dev/mliem-invoice-prod/apps/mailflare:bun-3
 options:
   machineType: E2_HIGHCPU_8
 timeout: 2700s
